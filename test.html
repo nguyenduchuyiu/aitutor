@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ lesson.title }}</title>
+</head>
+<body>
+    <h1>{{ lesson.title }}</h1>
+    <p>{{ lesson.description }}</p>
+
+    {% for stage in lesson.stages.all|dictsort:"order" %}
+        <h2>Stage: {{ stage.name }}</h2>
+        <p>{{ stage.description }}</p>
+
+        {% for activity in stage.activities.all|dictsort:"order" %}
+            <div>
+                <h3>Activity: {{ activity.activity_type }}</h3>
+
+                {% if activity.activity_type == 'text' %}
+                    <p>{{ activity.content }}</p>
+                {% elif activity.activity_type == 'question' %}
+                    <p>Question: {{ activity.content }}</p>
+                    <!-- Add input field for student answer here -->
+                {% elif activity.activity_type == 'youtube' %}
+                    <iframe width="560" height="315" src="{{ activity.content }}" frameborder="0" allowfullscreen></iframe>
+                {% elif activity.activity_type == 'canvas_exercise' %}
+                    <!--Implement Canvas exercise-->
+                {% elif activity.activity_type == 'chatbot_interaction' %}
+                    <!-- Implement Chatbot -->
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endfor %}
+</body>
+</html>

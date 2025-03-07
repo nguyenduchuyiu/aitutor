@@ -1,0 +1,24 @@
+[
+    {
+        "model": "lessons.lesson",
+        "pk": 1,
+        "fields": {
+            "title": "Introduction to Calculus",
+            "content": "This is a basic introduction to calculus...",
+            "stage": "start",
+            "topic": 1,
+            "progress": 10
+        }
+    },
+    {
+        "model": "lessons.lesson",
+        "pk": 2,
+        "fields": {
+            "title": "Advanced Algebra",
+            "content": "Explore the depths of algebra...",
+            "stage": "learn",
+            "topic": 2,
+            "progress": 20
+        }
+    }
+] 

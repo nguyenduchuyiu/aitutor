@@ -1,0 +1,327 @@
+:root {
+    --primary-color: #4a6fa5;
+    --secondary-color: #f8f9fa;
+    --accent-color: #6c8fc7;
+    --text-color: #333;
+    --border-color: #dee2e6;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f5f7fa;
+    color: var(--text-color);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: var(--shadow);
+    position: relative;
+    z-index: 10;
+}
+
+.main-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.chat-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border-color);
+    background-color: white;
+}
+
+.canvas-section {
+    flex: 1.5;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+}
+
+.chat-header, .notebook-header {
+    padding: 0.8rem;
+    background-color: var(--secondary-color);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-messages {
+    flex-grow: 1; /* Allow the chat messages to grow and fill available space */
+    max-height: 70vh; /* Set a maximum height relative to viewport height */
+    overflow-y: auto; /* Enable vertical scrolling */
+    border: 1px solid #ccc; /* Optional: Add a border */
+    padding: 10px; /* Optional: Add some padding */
+    background-color: #f9f9f9; /* Optional: Background color */
+    display: flex; /* Use flexbox for layout */
+    flex-direction: column; /* Stack messages vertically */
+}
+
+.message {
+    margin: 5px 0; /* Add some margin between messages */
+}
+
+.message.assistant {
+    align-self: flex-start; /* Align assistant messages to the left */
+    background-color: #e0f7fa; /* Optional: Different background for assistant messages */
+    padding: 8px; /* Optional: Add padding */
+    border-radius: 5px; /* Optional: Rounded corners */
+}
+
+.message.user {
+    align-self: flex-end; /* Align user messages to the right */
+    background-color: #ffe0b2; /* Optional: Different background for user messages */
+    padding: 8px; /* Optional: Add padding */
+    border-radius: 5px; /* Optional: Rounded corners */
+}
+
+.message-input-container {
+    padding: 0.8rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 0.5rem;
+}
+
+.message-input {
+    flex: 1;
+    padding: 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    outline: none;
+    resize: none;
+    max-height: 120px;
+    min-height: 40px;
+}
+
+.send-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.send-button:hover {
+    background-color: var(--accent-color);
+}
+
+/* Notebook Section */
+.notebook-content {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto; /* Enable vertical scrolling */
+    line-height: 1.6;
+    max-height: calc(100vh - 200px); /* Adjust this value based on header height */
+}
+
+/* Notebook Section */
+.notebook-section {
+    flex: 1.5;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+}
+
+.notebook-header {
+    padding: 0.8rem;
+    background-color: var(--secondary-color);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notebook-tabs {
+    display: flex;
+    background-color: var(--secondary-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tab {
+    padding: 0.8rem 1.2rem;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.tab.active {
+    border-bottom: 3px solid var(--primary-color);
+    font-weight: bold;
+    background-color: white;
+}
+
+.tab:hover:not(.active) {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Section Content */
+.section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--accent-color);
+}
+
+.subsection {
+    margin: 1.5rem 0;
+}
+
+.subsection-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+    color: var(--text-color);
+}
+
+.example-box {
+    background-color: var(--secondary-color);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.example-title {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.exercise-box {
+    background-color: #e9f3ff;
+    border: 1px solid #b8daff;
+    border-radius: 5px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.theory-box {
+    background-color: #f8f9fa;
+    border-left: 4px solid var(--primary-color);
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.definition-box {
+    background-color: #f1f8e9;
+    border: 1px solid #c5e1a5;
+    border-radius: 5px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.math-formula {
+    font-family: 'Times New Roman', serif;
+    background-color: #f5f5f5;
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+    overflow-x: auto;
+}
+
+.tool-container {
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    margin: 1rem 0;
+    overflow: hidden;
+}
+
+.tool-header {
+    background-color: var(--secondary-color);
+    padding: 0.5rem;
+    font-weight: bold;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tool-content {
+    padding: 1rem;
+    min-height: 300px;
+}
+
+.graph-container {
+    width: 100%;
+    height: 400px;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Progress indicators */
+.progress-container {
+    margin: 1rem 0;
+    background-color: var(--secondary-color);
+    border-radius: 5px;
+    padding: 0.5rem;
+}
+
+.progress-title {
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.progress-bar {
+    height: 10px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--primary-color);
+    border-radius: 5px;
+    transition: width 0.5s ease-in-out;
+}
+
+.logout-button {
+    background-color: #f44336; /* Màu nền đỏ */
+    color: white; /* Màu chữ trắng */
+    border: none; /* Không có viền */
+    padding: 10px 15px; /* Khoảng cách bên trong */
+    border-radius: 5px; /* Bo tròn góc */
+    cursor: pointer; /* Con trỏ chuột khi di chuột qua */
+    font-size: 16px; /* Kích thước chữ */
+    margin-left: 20px; /* Khoảng cách bên trái */
+}
+
+.logout-button:hover {
+    background-color: #d32f2f; /* Màu nền khi di chuột qua */
+}

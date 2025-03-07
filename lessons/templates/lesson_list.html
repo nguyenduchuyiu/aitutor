@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lesson List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #f9f9f9;
+            margin: 5px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lesson List</h1>
+    <ul>
+        {% for lesson in lessons %}
+            <li>
+                <a href="{% url 'lesson_detail' lesson.id %}">{{ lesson.title }}</a>
+                <p>{{ lesson.description }}</p>
+            </li>
+        {% empty %}
+            <li>No lessons available.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
