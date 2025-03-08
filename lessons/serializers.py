@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Lesson, LessonSection, Example, Exercise
+from .models import Lesson, LessonSection, Example, Exercise, Tool
 
 class ExampleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,9 +19,15 @@ class LessonSectionSerializer(serializers.ModelSerializer):
         model = LessonSection
         fields = ["title", "content", "examples", "exercises"]
 
+class ToolSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tool
+        fields = ["name", "description", "embed_url"]
+
 class LessonSerializer(serializers.ModelSerializer):
     sections = LessonSectionSerializer(many=True, read_only=True)
+    tools = ToolSerializer(many=True, read_only=True)
 
     class Meta:
         model = Lesson
-        fields = ["id", "title", "description", "progress", "sections"]
+        fields = ["id", "title", "description", "progress", "sections", "tools"]

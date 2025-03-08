@@ -325,3 +325,114 @@ body {
 .logout-button:hover {
     background-color: #d32f2f; /* Màu nền khi di chuột qua */
 }
+
+.latex-block {
+    padding: 10px;
+    margin: 10px 0;
+    background: #f8f9fa;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.latex-inline {
+    font-family: "Times New Roman", serif;
+    color: #d32f2f;
+}
+
+.message pre code {
+    background: #f3f3f3;
+    padding: 10px;
+    border-radius: 4px;
+    display: block;
+    overflow-x: auto;
+}
+.message {
+    white-space: pre-wrap; /* Giữ nguyên khoảng trắng và xuống dòng */
+    line-height: 1.6;
+}
+
+.message strong {
+    color: #2c3e50; /* Màu đậm cho các tiêu đề */
+}
+
+.message em {
+    color: #7f8c8d; /* Màu nhạt cho chú thích */
+}
+
+.message pre code {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    display: block;
+    margin: 10px 0;
+}
+
+.latex-block {
+    margin: 15px 0;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+/* Định dạng danh sách */
+.list-number {
+    color: #2ecc71;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+.list-bullet {
+    color: #e74c3c;
+    margin-right: 8px;
+    font-size: 1.2em;
+    animation: bullet-pulse 1s ease-in-out;
+}
+
+/* Thụt đầu dòng */
+.indent {
+    display: inline-block;
+    width: 40px;
+}
+
+.message .indent:nth-child(2) { width: 80px; }
+.message .indent:nth-child(3) { width: 120px; }
+
+/* Hiệu ứng */
+@keyframes bullet-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Công thức toán học */
+.latex-block {
+    margin: 15px 0;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.latex-inline {
+    font-family: "Times New Roman", serif;
+    color: #d32f2f;
+}
+
+/* Căn chỉnh căn bậc 2 */
+.mjx-sqrt {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 2px;
+}
+
+/* Đảm bảo chữ in đậm */
+strong {
+    font-weight: 700;
+    color: #2c3e50;
+    letter-spacing: -0.3px;
+}
+
+/* Căn chỉnh các phần tử trong công thức */
+.mjx-char {
+    padding-bottom: 1px;
+}

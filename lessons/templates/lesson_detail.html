@@ -9,6 +9,27 @@
     <link rel="stylesheet" href="{% static 'css/lesson_detail.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="{% static 'js/lesson_script.js' %}"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['\\[', '\\]'], ['$$', '$$']],
+                processEscapes: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            },
+            startup: {
+                ready: () => {
+                    MathJax.startup.defaultReady();
+                    MathJax.startup.promise.then(() => {
+                        console.log('MathJax initialized');
+                    });
+                }
+            }
+        };
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <header class="header">
@@ -27,9 +48,6 @@
             </div>
             
             <div class="chat-messages" id="chat-messages">
-                <div class="message assistant">
-                    Xin chào! Tôi là trợ lý giảng dạy của bạn. Hôm nay chúng ta sẽ học về "Tính đơn điệu và cực trị của hàm số". Bạn đã sẵn sàng chưa?
-                </div>
             </div>
             
             <div class="message-input-container">

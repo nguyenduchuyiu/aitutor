@@ -11,3 +11,8 @@ function searchLessons() {
         }
     }
 }
+
+
+function handleLessonSelection(lessonId) {
+    window.location.href = `/lessons/${lessonId}`; 
+}

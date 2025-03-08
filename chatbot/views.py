@@ -13,19 +13,23 @@ def chatbot_response(request):
         return JsonResponse({'response': 'No input provided'}, status=400)
     
     try:
-        response = get_llm_response(message, request, lesson_id)
+        result = get_llm_response(message, request, lesson_id)
+        
+        # Return the response with action flags
         return JsonResponse({
-            'response': response,
-            'update_lesson': False,  # These flags will be set by get_llm_response
-            'new_stage': None,       # based on the conversation context
-            'update_progress': False,
-            'progress': None
+            'response': result['response'],
+            'update_lesson': result['stage_change'],
+            'new_stage': result['new_stage'],
+            'update_tab': result['tab_change'],
+            'new_tab': result['new_tab'],
+            'update_progress': result['progress_update'],
+            'progress': result['progress']
         })
     except Exception as e:
         return JsonResponse({
             'response': 'Sorry, I cannot process your message at this time.',
             'error': str(e)
-        }, status=500) 
+        }, status=500)
 
 def update_tab_context(request):
     if request.method == 'POST':
