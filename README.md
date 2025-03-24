@@ -1,5 +1,7 @@
-## Setup
+## See demo
+![Demo of AI Tutor](aitutor.gif)
 
+## Setup
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/nguyenduchuyiu/aitutor.git
