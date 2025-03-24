@@ -7,26 +7,44 @@ let currentLesson = {
     progress: 10,
     completedSections: []
 };
+let ggbInitialized = false;
 
 // Initialize CSRF token for AJAX requests
 const csrftoken = getCookie('csrftoken');
 axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
 
-// Function to send chat message
+
+// Document ready event
 document.addEventListener('DOMContentLoaded', function() {
     // Get lesson ID from URL before using it
     currentLesson.id = getLessonIdFromUrl();
 
     // Fetch and load lesson content
     fetchLessonInfo(currentLesson.id);
-    loadLessonContent(currentLesson.id);
 
     // Set up event listeners
     const input = document.getElementById('message-input');
-    input.addEventListener('input', autoResizeTextarea);
+    if (input) {
+        input.addEventListener('input', autoResizeTextarea);
+    }
+
+    // Set up tab switching
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const tabId = button.getAttribute('data-tab');
+            switchTab(tabId);
+        });
+    });
+
+    // Initialize calculator if it exists
+    if (document.querySelector('.calculator')) {
+        initializeCalculator();
+    }
 
     // Add default message in chat and send it automatically
-    sendMessage("Bắt đầu bài học");
+    setTimeout(() => {
+        sendMessage("Bắt đầu bài học");
+    }, 500);
 });
 
 
@@ -37,43 +55,8 @@ function getLessonIdFromUrl() {
     return pathSegments[pathSegments.length - 2];
 }
 
-// Function to load all lesson content
-function loadLessonContent(lessonId) {
-    // Load all lesson data in a single API call
-    axios.get(`/lessons/api/${lessonId}/`)
-        .then(response => {
-            const data = response.data;
-            // Update lesson state
-            currentLesson.name = data.title;
-            currentLesson.progress = data.progress;
-            currentLesson.stage = data.stage;
-            currentLesson.topic = data.topic;
-            currentLesson.completedSections = data.completed_sections;
-            
-            // Update UI
-            document.getElementById('lesson-status').textContent = data.title;
-            document.querySelector('.section-title').textContent = data.title;
-            updateProgressBar();
-            
-            // Render all content
-            renderLessonContent(data);
-            renderExamples(data.sections);
-            renderExercises(data.sections);
-            renderTools(data);
-            
-            // Add welcome message if needed
-            if (data.welcome_message && document.querySelectorAll('.message').length <= 1) {
-                addMessage('assistant', data.welcome_message);
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching lesson content:', error);
-            document.getElementById('lesson-dynamic-content').innerHTML = 
-                '<div class="error-message">Không thể tải nội dung bài học. Vui lòng thử lại sau.</div>';
-        });
-}
-
-// Function to render lesson content
+// Function to render lesson content 
+// TODO: not used
 function renderLessonContent(lessonData) {
     const container = document.getElementById('lesson-dynamic-content');
     
@@ -102,6 +85,7 @@ function renderLessonContent(lessonData) {
         `;
         container.appendChild(sectionDiv);
     });
+
 }
 
 // Function to render examples
@@ -134,7 +118,7 @@ function renderExamples(sections) {
             content += `<img src="${example.image}" alt="Example illustration" class="example-image">`;
         }
         
-        exampleDiv.innerHTML = content;
+        exampleDiv.innerHTML = formatContent(content);
         container.appendChild(exampleDiv);
     });
 }
@@ -173,8 +157,8 @@ function renderExercises(sections = []) {
         const exerciseDiv = document.createElement('div');
         exerciseDiv.className = 'exercise-item';
         exerciseDiv.innerHTML = `
-            <div class="question">${exercise.question || ''}</div>
-            <div class="answer" id="answer-${exercise.id}" class="hidden">${exercise.answer || ''}</div>
+            <div class="question">${formatContent(exercise.question) || ''}</div>
+            <div class="answer" id="answer-${exercise.id}" class="hidden">${formatContent(exercise.answer) || ''}</div>
             <button onclick="toggleAnswer(${exercise.id})">Hiển thị đáp án</button>
         `;
         container.appendChild(exerciseDiv);
@@ -331,70 +315,12 @@ function initializeCalculator() {
 }
 
 
-// Modify sendMessage to accept default messages
-function sendMessage(defaultMessage = null) {
-    const input = document.getElementById('message-input');
-    let message = defaultMessage ? defaultMessage : input.value.trim();
-    
-    if (!message) return;
-
-    // Add user message to chat
-    addMessage('user', message);
-
-    // Clear input only if it's not the default message
-    if (!defaultMessage) {
-        input.value = '';
-        input.style.height = 'auto';
-    }
-
-    // Create FormData correctly
-    const formData = new FormData();
-    formData.append('lesson_id', currentLesson.id);
-    formData.append('message', message);
-
-    // Send message to backend
-    axios.post('/chatbot/api/get_response/', 
-        formData,
-        {
-            headers: {
-                'X-CSRFToken': getCSRFToken(),
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        }
-    )
-    .then(response => {
-        // Add assistant response to chat
-        addMessage('assistant', response.data.response);
-        
-        // Check if we need to update the lesson content
-        if (response.data.update_lesson) {
-            updateLessonStage(response.data.new_stage);
-        }
-        
-        // Check if we need to update the tab
-        if (response.data.update_tab) {
-            switchTab(response.data.new_tab);
-        }
-        
-        // Check if we need to update the progress
-        if (response.data.update_progress) {
-            currentLesson.progress = response.data.progress;
-            updateProgressBar();
-        }
-    })
-    .catch(error => {
-        console.error('Error sending message:', error);
-        addMessage('assistant', 'Xin lỗi, tôi không thể xử lý tin nhắn của bạn lúc này. Vui lòng thử lại sau.');
-    });
-}
-
-
 // Function to add message to chat
 function addMessage(sender, text) {
     const chatMessages = document.getElementById('chat-messages');
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${sender}`;
-    messageDiv.innerHTML = formatMessageContent(text);
+    messageDiv.innerHTML = formatContent(text);
     chatMessages.appendChild(messageDiv);
     
     // Kích hoạt render LaTeX
@@ -405,25 +331,15 @@ function addMessage(sender, text) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-function formatMessageContent(content) {
-
+// Function to format content with LaTeX support
+function formatContent(content) {
+    if (!content) return '';
+    
     // Xử lý căn bậc 2
     content = content.replace(/\\sqrt{([^}]+)}/g, '\\sqrt{$1}');
 
     // Xử lý in đậm
-    content = content.replace(/<strong>(.*?)<\/strong>/g, '<strong>$1</strong>');
-    
-    // Kích hoạt MathJax render
-    if (MathJax.typeset) {
-        MathJax.typesetPromise().then(() => {
-            // Fix căn chỉnh sau render
-            document.querySelectorAll('.mjx-sqrt').forEach(sqrt => {
-                sqrt.style.verticalAlign = 'middle';
-            });
-        });
-    }
-    // Xử lý thụt đầu dòng
-    content = content.replace(/ /g, '<span class="indent"></span>');
+    content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     
     // Xử lý xuống dòng
     content = content.replace(/\n/g, '<br>');
@@ -438,6 +354,7 @@ function formatMessageContent(content) {
     
     return content;
 }
+
 
 // Function to auto-resize textarea
 function autoResizeTextarea() {
@@ -463,77 +380,40 @@ function handleKeyDown(event) {
 
 // Function to update lesson stage
 function updateLessonStage(newStage) {
+    // Only update if stage changed
+    if (currentLesson.stage === newStage) return;
+    
     currentLesson.stage = newStage;
     
     // Update UI based on stage
-    switch (newStage) {
-        case 'opening':
-            document.getElementById('lesson-dynamic-content').innerHTML = lessonContent.opening.content;
-            break;
-        case 'start':
-            document.getElementById('lesson-dynamic-content').innerHTML = lessonContent.start.content;
-            break;
-        case 'learn':
-            // If we have a topic number, show that specific topic
-            if (currentLesson.topic < lessonContent.learn.length) {
-                document.getElementById('lesson-dynamic-content').innerHTML = 
-                    lessonContent.learn[currentLesson.topic].content;
-            }
-            break;
-        case 'practice':
-            document.getElementById('lesson-dynamic-content').innerHTML = lessonContent.practice.content;
-            switchTab('exercises');
-            break;
-        case 'end':
-            document.getElementById('lesson-dynamic-content').innerHTML = lessonContent.end.content;
-            break;
-    }
+    // let message = '';
+    // switch (newStage) {
+    //     case 'opening':
+    //         message = 'Giới thiệu bài học';
+    //         break;
+    //     case 'learn':
+    //         message = 'Bắt đầu học';
+    //         break;
+    //     case 'practice':
+    //         message = 'Bắt đầu làm bài tập';
+    //         switchTab('exercises');
+    //         break;
+    //     case 'review':
+    //         message = 'Ôn tập lại bài học';
+    //         break;
+    //     case 'end':
+    //         message = 'Kết thúc bài học';
+    //         break;
+    // }
     
-    // Reload all other content
-    loadLessonContent(currentLesson.id);
-}
-
-// Function to update progress bar
-function updateProgressBar() {
-    const progressFill = document.querySelector('.progress-fill');
-    progressFill.style.width = `${currentLesson.progress}%`;
-}
-
-// Function to switch tabs
-function switchTab(tabId) {
-    // Hide all tab content
-    document.getElementById('lesson-content').classList.add('hidden');
-    document.getElementById('examples').classList.add('hidden');
-    document.getElementById('exercises').classList.add('hidden');
-    document.getElementById('tools').classList.add('hidden');
+    // // Send automatic message to trigger content for new stage
+    // if (message) {
+    //     setTimeout(() => sendMessage(message), 500);
+    // }
     
-    // Show selected tab
-    document.getElementById(tabId).classList.remove('hidden');
-    
-    // Update active tab
-    const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(tab => tab.classList.remove('active'));
-    
-    // Find and mark selected tab
-    tabs.forEach(tab => {
-        if (tab.getAttribute('onclick').includes(tabId)) {
-            tab.classList.add('active');
-        }
-    });
-    
-    // Update lesson status with chat API
-    axios.post('/chatbot/api/tab_change/', {
-        lesson_id: currentLesson.id,
-        tab: tabId
-    })
-    .then(response => {
-        if (response.data.message) {
-            addMessage('assistant', response.data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error updating tab:', error);
-    });
+    // Update UI elements to reflect stage change
+    document.getElementById('lesson-stage').textContent = currentLesson.stage;
+    updateProgressBar();
 }
 
 // Function to toggle fullscreen for notebook
@@ -643,10 +523,11 @@ function plotFunction() {
         ctx.lineWidth = 2;
         ctx.stroke();
         
-        // Add function label
+        // Add function label with formatted content
         ctx.fillStyle = '#000';
         ctx.font = '14px Arial';
-        ctx.fillText(`f(x) = ${input}`, 10, 20);
+        const formattedLabel = formatContent(`f(x) = ${input}`);
+        ctx.fillText(formattedLabel, 10, 20);
         
     } catch (error) {
         graphDisplay.innerHTML = `
@@ -671,31 +552,46 @@ function displayLessonInfo(data) {
     const lessonContentElement = document.getElementById('lesson-dynamic-content');
     lessonContentElement.innerHTML = `
         <div class="subsection fade-in">
-            <div class="subsection-title">${data.title}</div>
-            <p>${data.description}</p>
-            <h3>Progress: ${data.progress}%</h3>
+            <div class="subsection-title">${formatContent(data.title)}</div>
+            <p>${formatContent(data.description)}</p>
             ${data.sections.map(section => `
                 <div class="section">
-                    <h4>${section.title}</h4>
-                    <p>${section.content}</p>
+                    <h4>${formatContent(section.title)}</h4>
+                    <p>${formatContent(section.content)}</p>
                     <h5>Examples</h5>
                     <ul>${section.examples.map(example => `
                         <li>
-                            <p>${example.explanation}</p>
-                            ${example.image ? `<img src="${example.image}" alt="Example Image">` : ''}
+                            <p>${formatContent(example.explanation)}</p>
+                            ${example.image ? `<img src="{% static '${example.image}' %}" alt="Example">` : ''}
                         </li>`).join('')}
                     </ul>
                     <h5>Exercises</h5>
                     <ul>${section.exercises.map(exercise => `
                         <li>
-                            <p>Question: ${exercise.question}</p>
-                            <p>Answer: ${exercise.answer}</p>
+                            <p>${formatContent(exercise.question)}</p>
+                            <p>${formatContent(exercise.answer)}</p>
                         </li>`).join('')}
                     </ul>
                 </div>
             `).join('')}
         </div>
     `;
+    renderTools(data)
+    renderExamples(data.sections)
+    renderExercises(data.sections)
+
+    // Trigger MathJax rendering after content is loaded
+    if (MathJax.typeset) {
+        MathJax.typeset([lessonContentElement]);
+        const examplesContentElement = document.getElementById('examples-dynamic-content');
+        if (examplesContentElement) {
+            MathJax.typeset([examplesContentElement]);
+        }
+        const exercisesContentElement = document.getElementById('exercises-dynamic-content');
+        if (exercisesContentElement) {
+            MathJax.typeset([exercisesContentElement]);
+        }
+    }
 }
 
 // Get CSRF token from cookie
@@ -713,4 +609,209 @@ function getCSRFToken() {
         }
     }
     return cookieValue;
+}
+
+
+function renderStageContent(data) {
+    switch(currentLesson.stage) {
+        case 'opening':
+            break;
+        case 'start':
+            renderStartContent(data);
+            break;
+        case 'learn':
+            renderLearnContent(data);
+            break;
+        case 'practice':
+            renderPracticeContent(data);
+            break;
+        case 'end':
+            renderEndContent(data);
+            break;
+        default:
+            renderDefaultContent(data);
+    }
+}
+
+
+function renderLearnContent(data) {
+    const container = document.getElementById('lesson-dynamic-content');
+    const currentTopic = data.sections[currentLesson.topic];
+    
+    container.innerHTML += `
+        <div class="subsection fade-in">
+            <h3>${currentTopic.title}</h3>
+            <div class="section-content">${currentTopic.content}</div>
+            ${currentTopic.examples.map(example => `
+                <div class="example">
+                    <p>${example.explanation}</p>
+                    ${example.image ? `<img src="${example.image}" alt="Ví dụ">` : ''}
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+}
+
+function loadLessonContent(lessonId) {
+    axios.get(`/lessons/api/${lessonId}/`)
+        .then(response => {
+            const data = response.data;
+            
+            // Chỉ cập nhật các phần chưa hoàn thành
+            if(!currentLesson.completedSections.includes(currentLesson.stage)) {
+                renderStageContent(data);
+                currentLesson.completedSections.push(currentLesson.stage);
+            }
+            
+            // Cập nhật các thành phần UI khác
+            updateProgressBar();
+            document.getElementById('lesson-status').textContent = data.title;
+            
+            // Kích hoạt render MathJax
+            if (MathJax.typeset) {
+                MathJax.typeset();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('lesson-dynamic-content').innerHTML = `
+                <div class="error">Lỗi tải bài học: ${error.message}</div>
+            `;
+        });
+}
+
+// Function to send chat message
+function sendMessage(defaultMessage = null) {
+    const input = document.getElementById('message-input');
+    let message = defaultMessage ? defaultMessage : input.value.trim();
+    
+    if (!message) return;
+
+    // Add user message to chat
+    addMessage('user', message);
+
+    // Clear input only if it's not the default message
+    if (!defaultMessage) {
+        input.value = '';
+        input.style.height = 'auto';
+    }
+
+    // Create FormData correctly
+    const formData = new FormData();
+    formData.append('lesson_id', currentLesson.id);
+    formData.append('message', message);
+
+    // Send message to backend
+    axios.post('/chatbot/api/get_response/', 
+        formData,
+        {
+            headers: {
+                'X-CSRFToken': getCSRFToken(),
+                'Content-Type': 'multipart/form-data' // Changed to correct content type
+            }
+        }
+    )
+    .then(response => {
+        // Add assistant response to chat
+        addMessage('assistant', response.data.response);
+        
+        // Check if we need to update the lesson content
+        if (response.data.update_lesson) {
+            updateLessonStage(response.data.new_stage);
+        }
+        
+        // Check if we need to update the tab
+        if (response.data.update_tab) {
+            switchTab(response.data.new_tab);
+        }
+        
+        // Check if we need to update the progress
+        if (response.data.update_progress) {
+            currentLesson.progress = response.data.progress;
+            updateProgressBar();
+        }
+    })
+    .catch(error => {
+        console.error('Error sending message:', error);
+        addMessage('assistant', 'Xin lỗi, tôi không thể xử lý tin nhắn của bạn lúc này. Vui lòng thử lại sau.');
+    });
+}
+
+// Function to update progress bar
+function updateProgressBar() {
+    // Calculate progress based on lesson stage
+    let progress = 0;
+    switch (currentLesson.stage) {
+        case 'opening':
+            progress = 0;
+            break;
+        case 'learn':
+            progress = 25;
+            break;
+        case 'practice':
+            progress = 50;
+            break;
+        case 'review':
+            progress = 75;
+            break;
+        case 'end':
+            progress = 100;
+            break;
+    }
+    
+    // If we have a specific progress value, use that instead
+    if (currentLesson.progress !== undefined) {
+        progress = currentLesson.progress;
+    }
+    
+    // Update progress bar width
+    const progressBar = document.querySelector('.progress-fill');
+    if (progressBar) {
+        progressBar.style.width = `${progress}%`;
+    }
+}
+
+// Function to switch to a specific tab
+function switchTab(tabId) {
+
+    // Get all tab buttons and content sections
+    const tabButtons = document.querySelectorAll('.notebook-tabs .tab');
+    const tabContents = document.querySelectorAll('.notebook-content > div');
+    
+    // Remove active class from all tabs
+    tabButtons.forEach(button => {
+        button.classList.remove('active');
+    });
+    
+    // Hide all tab contents
+    tabContents.forEach(content => {
+        content.classList.remove('active');
+        content.style.display = 'none';
+    });
+    
+    // Activate the selected tab
+    document.querySelector(`.notebook-tabs .tab[data-tab="${tabId}"]`)?.classList.add('active');
+    const selectedContent = document.getElementById(tabId);
+    if (selectedContent) {
+        selectedContent.classList.add('active');
+        selectedContent.style.display = 'block';
+        
+        // Update server about tab change
+        axios.post('/chatbot/api/update_tab_context/', 
+            {
+                lesson_id: currentLesson.id,
+                tab: tabId
+            },
+            {
+                headers: {
+                    'X-CSRFToken': getCSRFToken(),
+                    'Content-Type': 'application/json'
+                }
+            }
+        )
+        .catch(error => {
+            console.error('Error updating tab context:', error);
+        });
+    }
 }

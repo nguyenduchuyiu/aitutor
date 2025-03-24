@@ -9,9 +9,7 @@ def lesson_list(request):
 
 def lesson_detail(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id)
-    sections = lesson.sections.all().order_by("order")
-    
-    return render(request, "lesson_detail.html", {"lesson": lesson, "sections": sections})
+    return render(request, "lesson_detail.html")
 
 # API View for chatbot integration
 def api_lesson_detail(request, lesson_id):

@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="{% static 'css/lesson_detail.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="{% static 'js/lesson_script.js' %}"></script>
+
+
     <script>
         window.MathJax = {
             tex: {
@@ -45,6 +47,7 @@
             <div class="chat-header">
                 <span>Trao đổi với Trợ lý</span>
                 <span id="lesson-status">Bài 1: Tính đơn điệu và cực trị của hàm số</span>
+                <span id="lesson-stage"></span>
             </div>
             
             <div class="chat-messages" id="chat-messages">
@@ -119,7 +122,6 @@
                 <div id="tools" class="hidden">
                     <div class="section-title">Công cụ hỗ trợ học tập</div>
                     <div id="tools-dynamic-content">
-                        <div class="loading">Đang tải công cụ...</div>
                     </div>
                 </div>
             </div>

@@ -1,3 +1,4 @@
+# chatbot.views.py
 import json
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -17,7 +18,7 @@ def chatbot_response(request):
         
         # Return the response with action flags
         return JsonResponse({
-            'response': result['response'],
+            'response': result['response'], 
             'update_lesson': result['stage_change'],
             'new_stage': result['new_stage'],
             'update_tab': result['tab_change'],
@@ -48,4 +49,3 @@ def update_tab_context(request):
         return JsonResponse({'status': 'success', 'message': response_message, 'lesson_id': lesson_id, 'tab': tab_id})
     
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
-
